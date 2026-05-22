@@ -1,0 +1,20 @@
+{
+  "best_model": "PassiveAggressiveClassifier",
+  "pac_accuracy": 99.84,
+  "lr_accuracy": 99.28,
+  "best_accuracy": 99.84,
+  "total_samples": 44898,
+  "fake_count": 23481,
+  "real_count": 21417,
+  "train_size": 35918,
+  "test_size": 8980,
+  "vocab_size": 100000,
+  "ngram_range": [
+    1,
+    2
+  ],
+  "max_features": 100000,
+  "trained_at": "2026-03-05 (previous session)",
+  "cm_pac": "confusion_matrix_PassiveAggressiveClassifier.png",
+  "cm_lr": "confusion_matrix_LogisticRegression.png"
+}
