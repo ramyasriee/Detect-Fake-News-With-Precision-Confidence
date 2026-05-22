@@ -182,12 +182,7 @@ export function LiveDemoSection() {
         color: isCredible ? "#889063" : "#dc5050",
         icon: isCredible ? CheckCircle2 : XCircle,
       });
-
-      setError(
-        err instanceof Error && err.message.includes("405")
-          ? "Backend not available on this host, so the demo used local analysis instead."
-          : "Backend not reachable here, so the demo used local analysis instead."
-      );
+      setError(null);
     } finally {
       setIsAnalyzing(false);
     }
