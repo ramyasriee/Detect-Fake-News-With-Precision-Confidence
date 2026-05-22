@@ -1,0 +1,12 @@
+# Ignore backend, model files and data so Vercel only deploys the frontend
+**/*.py
+requirements.txt
+fake_news_model.pkl
+model_metadata.json
+*.csv
+streamlit_app.py
+backend.py
+model_training.py
+
+# Keep frontend folder
+!frontend_extracted/**
