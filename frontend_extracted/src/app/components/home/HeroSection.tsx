@@ -6,6 +6,10 @@ import { ImageWithFallback } from "../figma/ImageWithFallback";
 const heroImage = "https://images.unsplash.com/photo-1729554608003-5ec8be42da1d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxhcnRpZmljaWFsJTIwaW50ZWxsaWdlbmNlJTIwZGF0YSUyMGFuYWx5c2lzJTIwZGFyayUyMHRlY2hub2xvZ3l8ZW58MXx8fHwxNzcyNzAzODUxfDA&ixlib=rb-4.1.0&q=80&w=1080";
 
 export function HeroSection() {
+  const scrollToDemo = () => {
+    document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <section
       className="relative min-h-screen flex items-center overflow-hidden pt-20"
@@ -147,8 +151,9 @@ export function HeroSection() {
                 <span className="text-sm tracking-wider">Start Using Free</span>
                 <ArrowRight size={16} />
               </NavLink>
-              <a
-                href="#demo"
+              <button
+                type="button"
+                onClick={scrollToDemo}
                 className="flex items-center gap-3 px-7 py-3.5 rounded-xl transition-all duration-300 hover:scale-105"
                 style={{
                   background: "rgba(207,187,153,0.07)",
@@ -163,7 +168,7 @@ export function HeroSection() {
                   <Play size={12} fill="#CFBB99" />
                 </div>
                 <span className="text-sm tracking-wider">Watch Demo</span>
-              </a>
+              </button>
             </div>
 
             {/* Trust indicators */}

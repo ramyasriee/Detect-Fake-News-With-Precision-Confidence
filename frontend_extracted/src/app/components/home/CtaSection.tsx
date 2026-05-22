@@ -3,6 +3,10 @@ import { motion } from "motion/react";
 import { ArrowRight, Shield } from "lucide-react";
 
 export function CtaSection() {
+  const scrollToDemo = () => {
+    document.getElementById("demo")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <section
       className="py-24 relative overflow-hidden"
@@ -84,8 +88,9 @@ export function CtaSection() {
               <span className="tracking-wider">Start Using Free</span>
               <ArrowRight size={18} />
             </NavLink>
-            <a
-              href="#demo"
+            <button
+              type="button"
+              onClick={scrollToDemo}
               className="flex items-center gap-3 px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105"
               style={{
                 background: "rgba(207,187,153,0.07)",
@@ -94,7 +99,7 @@ export function CtaSection() {
               }}
             >
               <span className="tracking-wider">Try Live Demo</span>
-            </a>
+            </button>
           </div>
 
           {/* Guarantee */}
