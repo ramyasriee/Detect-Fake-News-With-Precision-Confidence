@@ -24,6 +24,109 @@ interface DisplayResult extends ApiResult {
   icon: typeof CheckCircle2;
 }
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "");
+const PREDICT_URL = API_BASE ? `${API_BASE}/predict` : "/api/predict";
+
+function analyzeLocally(text: string): ApiResult {
+  const lower = text.toLowerCase();
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const wordCount = words.length;
+  const cleanWordCount = lower
+    .replace(/https?:\/\/\S+|www\.\S+/g, "")
+    .replace(/[\p{P}\p{N}]/gu, " ")
+    .split(/\s+/)
+    .filter((word) => word.length > 2).length;
+
+  const suspiciousTerms = [
+    "breaking",
+    "shocking",
+    "secret",
+    "cure",
+    "guaranteed",
+    "miracle",
+    "hoax",
+    "they don't want you to know",
+    "share this",
+    "click here",
+  ];
+  const reliableTerms = [
+    "according to",
+    "reported",
+    "officials",
+    "data",
+    "research",
+    "statement",
+    "confirmed",
+    "source",
+  ];
+
+  let fakeScore = 50;
+  const upperWords = (text.match(/\b[A-Z]{3,}\b/g) || []).length;
+  const exclamations = (text.match(/!/g) || []).length;
+  const questionMarks = (text.match(/\?/g) || []).length;
+  const urlCount = (text.match(/https?:\/\/\S+|www\.\S+/g) || []).length;
+
+  fakeScore += Math.min(18, upperWords * 3);
+  fakeScore += Math.min(12, exclamations * 2);
+  fakeScore += Math.min(6, urlCount * 2);
+  fakeScore += wordCount < 60 ? 10 : 0;
+  fakeScore += questionMarks > 3 ? 4 : 0;
+
+  for (const term of suspiciousTerms) {
+    if (lower.includes(term)) fakeScore += 5;
+  }
+
+  for (const term of reliableTerms) {
+    if (lower.includes(term)) fakeScore -= 5;
+  }
+
+  fakeScore = Math.max(5, Math.min(95, fakeScore));
+  const isCredible = fakeScore < 50;
+  const credibilityScore = isCredible ? 100 - fakeScore : fakeScore;
+
+  const analysis: SubScore[] = [
+    {
+      label: "Source Credibility",
+      score: Math.max(2, Math.min(98, isCredible ? 78 : 28)),
+      max: 100,
+    },
+    {
+      label: "Factual Accuracy",
+      score: Math.max(2, Math.min(98, isCredible ? 74 : 32)),
+      max: 100,
+    },
+    {
+      label: "Linguistic Integrity",
+      score: Math.max(2, Math.min(98, isCredible ? 82 : 26)),
+      max: 100,
+    },
+    {
+      label: "Cross-Reference Match",
+      score: Math.max(2, Math.min(98, isCredible ? 70 : 30)),
+      max: 100,
+    },
+  ];
+
+  return {
+    verdict: isCredible ? "CREDIBLE" : "LIKELY FAKE",
+    score: credibilityScore,
+    analysis,
+    flags: isCredible
+      ? [
+          "Language looks measured and report-like",
+          "Contains fewer sensational indicators",
+          "Local demo analysis used because the backend is unavailable",
+        ]
+      : [
+          "Sensational wording or formatting detected",
+          "Signals often associated with low-credibility content",
+          "Local demo analysis used because the backend is unavailable",
+        ],
+    word_count: wordCount,
+    clean_word_count: cleanWordCount,
+  };
+}
+
 const sampleTexts = {
   fake: `BREAKING: Scientists DISCOVER that drinking bleach cures all diseases! Government has been HIDING this for decades! Major pharmaceutical companies TERRIFIED as this simple cure goes viral. Share this before they DELETE it!`,
   real: `The Federal Reserve raised interest rates by 25 basis points on Wednesday, the latest in a series of increases aimed at curbing inflation that has remained above the central bank's 2% target, according to officials who spoke at a press conference following the Federal Open Market Committee meeting.`,
@@ -49,7 +152,7 @@ export function LiveDemoSection() {
     }, 100);
 
     try {
-      const res = await fetch("/api/predict", {
+      const res = await fetch(PREDICT_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text }),
@@ -69,11 +172,21 @@ export function LiveDemoSection() {
         icon: isCredible ? CheckCircle2 : XCircle,
       });
     } catch (err) {
+      const fallback = analyzeLocally(text);
       clearInterval(interval);
+      setProgress(100);
+
+      const isCredible = fallback.verdict === "CREDIBLE";
+      setResult({
+        ...fallback,
+        color: isCredible ? "#889063" : "#dc5050",
+        icon: isCredible ? CheckCircle2 : XCircle,
+      });
+
       setError(
-        err instanceof Error
-          ? err.message
-          : "Failed to reach the prediction server. Make sure backend.py is running."
+        err instanceof Error && err.message.includes("405")
+          ? "Backend not available on this host, so the demo used local analysis instead."
+          : "Backend not reachable here, so the demo used local analysis instead."
       );
     } finally {
       setIsAnalyzing(false);
