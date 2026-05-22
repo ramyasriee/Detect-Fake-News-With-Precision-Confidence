@@ -137,13 +137,11 @@ export function LiveDemoSection() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<DisplayResult | null>(null);
   const [progress, setProgress] = useState(0);
-  const [error, setError] = useState<string | null>(null);
 
   const analyze = async () => {
     if (!text.trim()) return;
     setIsAnalyzing(true);
     setResult(null);
-    setError(null);
     setProgress(0);
 
     // Animate progress bar while waiting for the API
@@ -182,7 +180,6 @@ export function LiveDemoSection() {
         color: isCredible ? "#889063" : "#dc5050",
         icon: isCredible ? CheckCircle2 : XCircle,
       });
-      setError(null);
     } finally {
       setIsAnalyzing(false);
     }
@@ -313,20 +310,6 @@ export function LiveDemoSection() {
                 <p className="text-xs mt-2 text-center" style={{ color: "#889063" }}>
                   Analyzing content... {progress}%
                 </p>
-              </div>
-            )}
-
-            {/* Error state */}
-            {error && (
-              <div
-                className="mt-3 px-4 py-3 rounded-xl text-sm"
-                style={{
-                  background: "rgba(220,80,80,0.08)",
-                  border: "1px solid rgba(220,80,80,0.2)",
-                  color: "#dc9090",
-                }}
-              >
-                âš  {error}
               </div>
             )}
 
